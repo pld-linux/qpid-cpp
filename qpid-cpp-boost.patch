@@ -1,0 +1,53 @@
+--- qpidc-0.16/src/Makefile.am.orig	2012-02-24 21:05:47.000000000 +0100
++++ qpidc-0.16/src/Makefile.am	2012-07-29 13:30:13.075820560 +0200
+@@ -137,7 +137,7 @@
+ tmoduleexecdir = $(libdir)/qpid/tests
+ tmoduleexec_LTLIBRARIES=
+ 
+-AM_CXXFLAGS += -DBOOST_FILESYSTEM_VERSION=2
++AM_CXXFLAGS += -DBOOST_FILESYSTEM_VERSION=3
+ 
+ ## Automake macros to build libraries and executables.
+ qpidd_CXXFLAGS = $(AM_CXXFLAGS) -DQPIDD_MODULE_DIR=\"$(dmoduleexecdir)\" -DQPIDD_CONF_FILE=\"$(sysconfdir)/qpidd.conf\"
+--- qpidc-0.16/src/qpid/Modules.cpp.orig	2011-03-14 21:29:02.000000000 +0100
++++ qpidc-0.16/src/qpid/Modules.cpp	2012-07-29 21:31:10.801276183 +0200
+@@ -73,7 +73,7 @@
+ 
+ void loadModuleDir (std::string dirname, bool isDefault)
+ {
+-    fs::path dirPath (dirname, fs::native);
++    fs::path dirPath (dirname);
+ 
+     if (!fs::exists (dirPath))
+     {
+@@ -89,8 +89,8 @@
+     fs::directory_iterator endItr;
+     for (fs::directory_iterator itr (dirPath); itr != endItr; ++itr)
+     {
+-        if (!fs::is_directory(*itr) && isShlibName(itr->string()))
+-            tryShlib (itr->string().data(), true);
++        if (!fs::is_directory(*itr) && isShlibName(itr->path().string()))
++            tryShlib (itr->path().string().data(), true);
+     }
+ }
+ 
+--- qpidc-0.16/src/qpid/cluster/StoreStatus.cpp.orig	2010-04-01 19:51:04.000000000 +0200
++++ qpidc-0.16/src/qpid/cluster/StoreStatus.cpp	2012-07-29 21:53:14.617887294 +0200
+@@ -77,7 +77,7 @@
+         throw Exception(QPID_MSG("No data-dir: When a store is loaded together with clustering, --data-dir must be specified."));
+     }
+     try {
+-        fs::path dir = fs::path(dataDir, fs::native)/SUBDIR;
++        fs::path dir = fs::path(dataDir)/SUBDIR;
+         create_directory(dir);
+         fs::path file = dir/STORE_STATUS;
+         if (fs::exists(file)) {
+@@ -106,7 +106,7 @@
+     try {
+         ostringstream os;
+         os << clusterId << endl << shutdownId << endl;
+-        fs::path file = fs::path(dataDir, fs::native)/SUBDIR/STORE_STATUS;
++        fs::path file = fs::path(dataDir)/SUBDIR/STORE_STATUS;
+         writeFile(file, os.str());
+     }
+     catch (const std::exception& e) {

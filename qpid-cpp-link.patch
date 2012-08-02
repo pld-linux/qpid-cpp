@@ -1,0 +1,32 @@
+--- qpidc-0.16/src/Makefile.am.orig	2012-07-29 21:53:42.627886119 +0200
++++ qpidc-0.16/src/Makefile.am	2012-07-30 18:58:29.098034802 +0200
+@@ -337,6 +337,7 @@
+   -lboost_program_options \
+   -lboost_filesystem \
+   -luuid \
++  -lpthread \
+   $(LIB_DLOPEN) \
+   $(LIB_CLOCK_GETTIME)
+ 
+@@ -526,7 +527,7 @@
+ QPIDCOMMON_VERSION_INFO = 2:0:0
+ libqpidcommon_la_LDFLAGS=-version-info $(QPIDCOMMON_VERSION_INFO)
+ 
+-libqpidbroker_la_LIBADD = libqpidcommon.la
++libqpidbroker_la_LIBADD = libqpidcommon.la -lpthread
+ libqpidbroker_la_SOURCES = \
+   $(mgen_broker_cpp) \
+   $(posix_broker_src) \
+--- qpidc-0.16/configure.ac.orig	2012-04-12 22:13:46.000000000 +0200
++++ qpidc-0.16/configure.ac	2012-07-31 21:04:30.774091602 +0200
+@@ -532,8 +532,8 @@
+ LIBS=$gl_saved_libs
+ 
+ SOCKLIBS=""
+-AC_CHECK_LIB([socket],[socket],[SOCKET_LIB="-lsocket"],[SOCKET_LIB=""],[])
+-AC_CHECK_LIB([nsl],[getipnodebyname],[NSL_LIB="-lnsl"],[NSL_LIB=""],[])
++AC_CHECK_FUNC([socket], [SOCKET_LIB=""], [AC_CHECK_LIB([socket],[socket],[SOCKET_LIB="-lsocket"],[SOCKET_LIB=""],[])])
++AC_CHECK_FUNC([getipnodebyname], [NSL_LIB=""], [AC_CHECK_LIB([nsl],[getipnodebyname],[NSL_LIB="-lnsl"],[NSL_LIB=""],[])])
+ SOCKLIBS="$SOCKET_LIB $NSL_LIB"
+ AC_SUBST([SOCKLIBS])
+ 
