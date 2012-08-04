@@ -2,6 +2,7 @@
 # TODO:
 # - qpidd user/group
 # - qpidd init script
+# - look at Fedora spec at: http://rrakus.fedorapeople.org/qpid-cpp.spec
 #
 # Conditional build:
 %bcond_without	cman		# cman quorum service
@@ -47,7 +48,7 @@ BuildRequires:	ruby-devel >= 1.8
 BuildRequires:	swig-python >= 1.3.26
 BuildRequires:	swig-ruby >= 1.3.26
 BuildRequires:	xerces-c-devel
-#BuildRequires:	libxqilla-devel ???
+BuildRequires:	xqilla-devel
 %if %{with rdma}
 BuildRequires:	libibverbs-devel
 BuildRequires:	librdmacm-devel
@@ -246,6 +247,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/qpid/daemon/replication_exchange.so
 %attr(755,root,root) %{_libdir}/qpid/daemon/ssl.so
 %attr(755,root,root) %{_libdir}/qpid/daemon/watchdog.so
+%attr(755,root,root) %{_libdir}/qpid/daemon/xml.so
 %{_mandir}/man1/qpidd.1*
 %attr(755,qpidd,qpidd) %dir /var/lib/qpidd
 
