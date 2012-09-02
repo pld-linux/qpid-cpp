@@ -23,6 +23,8 @@ Source0:	http://www.us.apache.org/dist/qpid/%{version}/%{name}-%{version}.tar.gz
 Patch0:		%{name}-boost.patch
 Patch1:		%{name}-link.patch
 Patch2:		%{name}-perl.patch
+# https://reviews.apache.org/r/5593/
+Patch3:		%{name}-qmf-broker.patch
 URL:		http://qpid.apache.org/
 BuildRequires:	acl-devel
 BuildRequires:	autoconf >= 2.59
@@ -185,6 +187,7 @@ Wiązania języka Ruby do bibliotek Qpid/C++.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p2
 
 %build
 %{__libtoolize}
