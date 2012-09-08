@@ -199,7 +199,7 @@ Wiązania języka Ruby do bibliotek Qpid/C++.
 	%{?with_static_libs:--enable-static} \
 	--with-cpg%{!?with_corosync:=no} \
 	--with-cman%{!?with_cman:=no} \
-	--with-rdma%{!?with_rdma:=no} \
+	--with-rdma%{!?with_rdma:=no}
 %{__make}
 
 %install

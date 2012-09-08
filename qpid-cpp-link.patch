@@ -19,6 +19,14 @@
    $(posix_broker_src) \
 --- qpidc-0.16/configure.ac.orig	2012-04-12 22:13:46.000000000 +0200
 +++ qpidc-0.16/configure.ac	2012-07-31 21:04:30.774091602 +0200
+@@ -259,7 +259,6 @@
+ # Check for optional cluster requirements.
+ tmp_LIBS=$LIBS
+ tmp_LDFLAGS=$LDFLAGS
+-LDFLAGS="$LDFLAGS -L/usr/lib/openais -L/usr/lib64/openais -L/usr/lib/corosync -L/usr/lib64/corosync"
+ AC_CHECK_LIB([cpg],[cpg_local_get],[have_libcpg=yes],)
+ AC_CHECK_HEADERS([openais/cpg.h corosync/cpg.h],[have_cpg_h=yes],)
+ AC_ARG_WITH([cpg],  
 @@ -532,8 +532,8 @@
  LIBS=$gl_saved_libs
  
