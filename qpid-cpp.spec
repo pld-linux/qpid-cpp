@@ -1,8 +1,7 @@
-# $Revision: 1.8 $, $Date: 2011/07/23 06:34:38 $
 # TODO:
 # - qpidd user/group
 # - qpidd init script
-# - look at Fedora spec at: http://rrakus.fedorapeople.org/qpid-cpp.spec
+# - look at Fedora spec at: http://pkgs.fedoraproject.org/cgit/qpid-cpp.git
 #
 # Conditional build:
 %bcond_without	cman		# cman quorum service
@@ -147,7 +146,7 @@ Generator kodu QMF.
 %package -n perl-%{name}
 Summary:	Perl bindings for Qpid/C++ libraries
 Summary(pl.UTF-8):	Wiązania Perla do bibliotek Qpid/C++
-Group:		Development/Languges/Perl
+Group:		Development/Languages/Perl
 Requires:	%{name}-libs = %{version}-%{release}
 
 %description -n perl-%{name}
