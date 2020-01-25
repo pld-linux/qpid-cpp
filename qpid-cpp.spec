@@ -9,7 +9,6 @@
 %bcond_without	rdma		# Remote DMA protocol
 %bcond_without	static_libs	# static libraries
 #
-%include	/usr/lib/rpm/macros.perl
 Summary:	C++ implementation of the AMQP protocol
 Summary(pl.UTF-8):	Implementacja protokołu AMQP w C++
 Name:		qpid-cpp
