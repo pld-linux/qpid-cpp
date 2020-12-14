@@ -1,0 +1,77 @@
+--- qpidc-0.16/configure.ac.orig	2020-12-13 12:55:35.066289854 +0100
++++ qpidc-0.16/configure.ac	2020-12-13 18:50:43.760850752 +0100
+@@ -164,13 +164,13 @@
+ if test -n "$RUBY" ; then
+    AC_ARG_VAR(RUBY_INC, [Directory where ruby.h can be found])
+    if test -z "$RUBY_INC" ; then
+-      [RUBY_INC=`$RUBY -rrbconfig -e 'puts Config::CONFIG["rubyhdrdir"] || Config::CONFIG["archdir"]'`]
++      [RUBY_INC=`$RUBY -rrbconfig -e 'puts RbConfig::CONFIG["rubyhdrdir"] || RbConfig::CONFIG["archdir"]'`]
+    fi
+    AC_SUBST(RUBY_INC)
+ 
+    AC_ARG_VAR(RUBY_INC_ARCH, [Directory where ruby/config.h can be found (needed from Ruby 1.9)])
+    if test -z "$RUBY_INC_ARCH" ; then
+-      [RUBY_INC_ARCH=`$RUBY -rrbconfig -e 'd = Config::CONFIG["rubyhdrdir"];if d != nil; print d + "/" + Config::CONFIG["arch"]; end'`]
++      [RUBY_INC_ARCH=`$RUBY -rrbconfig -e 'd = RbConfig::CONFIG["rubyhdrdir"];if d != nil; print d + "/" + RbConfig::CONFIG["arch"]; end'`]
+       dnl For earlier versions, just make it the same as RUBY_INC.
+       test x"$RUBY_INC_ARCH" != x || RUBY_INC_ARCH=$RUBY_INC
+    fi
+@@ -178,14 +178,14 @@
+    AC_ARG_VAR(RUBY_LIB, [Directory to install ruby files into])
+       if test -z "$RUBY_LIB" ; then
+       dnl Kludge to install ruby files under $prefix
+-      [RUBY_LIB=`$RUBY -rrbconfig -e 'puts Config::CONFIG["sitelibdir"].gsub("/usr", "${prefix}")'`]
++      [RUBY_LIB=`$RUBY -rrbconfig -e 'puts RbConfig::CONFIG["vendorlibdir"].gsub("/usr", "${prefix}")'`]
+    fi
+    AC_SUBST(RUBY_LIB)
+ 
+ 	AC_ARG_VAR(RUBY_LIB_ARCH, [Directory to install ruby binary modules into])
+ 	if test -z "$RUBY_LIB_ARCH" ; then
+       dnl Kludge to install ruby files under $prefix
+-	  [RUBY_LIB_ARCH=`$RUBY -rrbconfig -e 'puts Config::CONFIG["sitearchdir"].gsub("/usr", "${prefix}")'`]
++	  [RUBY_LIB_ARCH=`$RUBY -rrbconfig -e 'puts RbConfig::CONFIG["vendorarchdir"].gsub("/usr", "${prefix}")'`]
+ 	fi
+ 	AC_SUBST(RUBY_LIB_ARCH)
+ 
+@@ -195,7 +195,7 @@
+ 	esac
+ 	AC_SUBST(RUBY_LIBS)
+ 
+-   RUBY_DLEXT=`$RUBY -rrbconfig -e 'puts Config::CONFIG[["DLEXT"]]'`
++   RUBY_DLEXT=`$RUBY -rrbconfig -e 'puts RbConfig::CONFIG[["DLEXT"]]'`
+    AC_SUBST(RUBY_DLEXT)
+ fi
+ AM_CONDITIONAL([HAVE_RUBY_DEVEL], [test -f $RUBY_INC/ruby.h && test -n "$SWIG"])
+--- qpidc-0.16/bindings/qpid/ruby/ruby.i.orig	2010-08-13 00:35:23.000000000 +0200
++++ qpidc-0.16/bindings/qpid/ruby/ruby.i	2020-12-13 19:47:14.499148213 +0100
+@@ -28,7 +28,7 @@
+     }
+     catch (qpid::messaging::MessagingException& mex) {
+         static VALUE merror = rb_define_class("MessagingError", rb_eStandardError);
+-        rb_raise(merror, mex.what());
++        rb_raise(merror, "%s", mex.what());
+     }
+ }
+ 
+--- qpidc-0.16/bindings/swig_ruby_typemaps.i.orig	2012-01-04 17:24:33.000000000 +0100
++++ qpidc-0.16/bindings/swig_ruby_typemaps.i	2020-12-13 20:27:15.396141438 +0100
+@@ -106,7 +106,7 @@
+             }
+         } catch (qpid::types::Exception& ex) {
+             static VALUE error = rb_define_class("Error", rb_eStandardError);
+-            rb_raise(error, ex.what());
++            rb_raise(error, "%s", ex.what());
+         }
+ 
+         return result;
+--- qpidc-0.16/bindings/qmf2/ruby/ruby.i.orig	2010-09-23 03:42:08.000000000 +0200
++++ qpidc-0.16/bindings/qmf2/ruby/ruby.i	2020-12-13 21:21:22.161885533 +0100
+@@ -28,7 +28,7 @@
+     }
+     catch (qpid::types::Exception& mex) {
+         static VALUE qmferror = rb_define_class("QmfError", rb_eStandardError);
+-        rb_raise(qmferror, mex.what());
++        rb_raise(qmferror, "%s", mex.what());
+     }
+ }
+ 

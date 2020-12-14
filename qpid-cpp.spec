@@ -13,7 +13,7 @@ Summary:	C++ implementation of the AMQP protocol
 Summary(pl.UTF-8):	Implementacja protokołu AMQP w C++
 Name:		qpid-cpp
 Version:	0.16
-Release:	0.1
+Release:	0.2
 License:	Apache v2.0
 Group:		Libraries
 Source0:	http://www.us.apache.org/dist/qpid/%{version}/%{name}-%{version}.tar.gz
@@ -23,6 +23,9 @@ Patch1:		%{name}-link.patch
 Patch2:		%{name}-perl.patch
 # https://reviews.apache.org/r/5593/
 Patch3:		%{name}-qmf-broker.patch
+Patch4:		%{name}-c++.patch
+Patch5:		%{name}-corosync.patch
+Patch6:		%{name}-ruby.patch
 URL:		http://qpid.apache.org/
 BuildRequires:	acl-devel
 BuildRequires:	autoconf >= 2.59
@@ -43,7 +46,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	python-devel >= 1:2.7
 BuildRequires:	rpm-perlprov
 BuildRequires:	rpm-pythonprov
-BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	rpmbuild(macros) >= 1.745
 BuildRequires:	ruby-devel >= 1.8
 BuildRequires:	swig-python >= 1.3.26
 BuildRequires:	swig-ruby >= 1.3.26
@@ -186,6 +189,18 @@ Wiązania języka Ruby do bibliotek Qpid/C++.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p2
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+
+# deprecated std::auto_ptr
+# "invalid use of incomplete type qpid::framing::Handler<T>"
+%{__sed} -i -e 's/-Werror/-Wno-deprecated/' configure.ac
+
+%{__sed} -i -e '1s,/usr/bin/env python,%{__python},' managementgen/qmf-gen
+
+# force using newer version
+%{__rm} m4/python.m4
 
 %build
 %{__libtoolize}
@@ -203,11 +218,11 @@ Wiązania języka Ruby do bibliotek Qpid/C++.
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%{__make} -j1 install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 %{__rm} $RPM_BUILD_ROOT%{py_sitedir}/*.la \
-	$RPM_BUILD_ROOT%{ruby_sitearchdir}/*.la \
+	$RPM_BUILD_ROOT%{ruby_vendorarchdir}/*.la \
 	$RPM_BUILD_ROOT%{_libdir}/qpid/{client,daemon}/*.la
 %if %{with static_libs}
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/qpid/{client,daemon}/*.a
@@ -215,7 +230,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__rm} -r $RPM_BUILD_ROOT%{_libdir}/qpid/tests
 
 install -d $RPM_BUILD_ROOT%{_examplesdir}
-mv $RPM_BUILD_ROOT%{_datadir}/qpidc/examples $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/qpidc/examples $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 %py_postclean
 
@@ -336,7 +351,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{perl_vendorarch}/cqpid_perl.pm
 %dir %{perl_vendorarch}/auto/cqpid_perl
-%{perl_vendorarch}/auto/cqpid_perl/cqpid_perl.bs
 %attr(755,root,root) %{perl_vendorarch}/auto/cqpid_perl/cqpid_perl.so
 
 %files -n python-%{name}
@@ -352,8 +366,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n ruby-%{name}
 %defattr(644,root,root,755)
-%attr(755,root,root) %{ruby_sitearchdir}/cqmf2.so
-%attr(755,root,root) %{ruby_sitearchdir}/cqpid.so
-%attr(755,root,root) %{ruby_sitearchdir}/qmfengine.so
-%{ruby_sitelibdir}/qmf.rb
-%{ruby_sitelibdir}/qmf2.rb
+%attr(755,root,root) %{ruby_vendorarchdir}/cqmf2.so
+%attr(755,root,root) %{ruby_vendorarchdir}/cqpid.so
+%attr(755,root,root) %{ruby_vendorarchdir}/qmfengine.so
+%{ruby_vendorlibdir}/qmf.rb
+%{ruby_vendorlibdir}/qmf2.rb

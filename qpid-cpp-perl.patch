@@ -21,3 +21,25 @@
  	cd ..
  
  clean-local:
+--- qpidc-0.16/bindings/qpid/perl/perl.i.orig	2011-02-18 20:16:35.000000000 +0100
++++ qpidc-0.16/bindings/qpid/perl/perl.i	2020-12-14 09:51:37.944680768 +0100
+@@ -27,7 +27,7 @@
+         $action
+     }
+     catch (qpid::messaging::MessagingException& mex) {
+-        Perl_croak(aTHX_ mex.what());
++        Perl_croak(aTHX_ "%s", mex.what());
+     }
+ }
+ 
+--- qpidc-0.16/bindings/swig_perl_typemaps.i.orig	2011-01-27 18:04:40.000000000 +0100
++++ qpidc-0.16/bindings/swig_perl_typemaps.i	2020-12-14 09:52:11.054501396 +0100
+@@ -110,7 +110,7 @@
+             }
+             }
+         } catch (qpid::types::Exception& ex) {
+-            Perl_croak(aTHX_ ex.what());
++            Perl_croak(aTHX_ "%s", ex.what());
+         }
+ 
+         return result;

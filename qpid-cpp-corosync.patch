@@ -1,0 +1,163 @@
+--- qpidc-0.16/src/qpid/cluster/Cpg.cpp.orig	2010-02-26 17:47:23.000000000 +0100
++++ qpidc-0.16/src/qpid/cluster/Cpg.cpp	2020-12-13 07:18:53.042400272 +0100
+@@ -32,7 +32,7 @@
+ // This is a macro instead of a function because we don't want to
+ // evaluate the MSG argument unless there is an error.
+ #define CPG_CHECK(RESULT, MSG) \
+-    if ((RESULT) != CPG_OK) throw Exception(errorStr((RESULT), (MSG)))
++    if ((RESULT) != CS_OK) throw Exception(errorStr((RESULT), (MSG)))
+ 
+ namespace qpid {
+ namespace cluster {
+@@ -50,13 +50,13 @@
+ 
+ // Applies the same retry-logic to all cpg calls that need it.
+ void Cpg::callCpg ( CpgOp & c ) {
+-    cpg_error_t result;
++    cs_error_t result;
+     unsigned int snooze = 10;
+     for ( unsigned int nth_try = 0; nth_try < cpgRetries; ++ nth_try ) {
+-        if ( CPG_OK == (result = c.op(handle, & group))) {
++        if ( CS_OK == (result = c.op(handle, & group))) {
+             break;
+         }
+-        else if ( result == CPG_ERR_TRY_AGAIN ) {
++        else if ( result == CS_ERR_TRY_AGAIN ) {
+             QPID_LOG(info, "Retrying " << c.opName );
+             sys::usleep ( snooze );
+             snooze *= 10;
+@@ -65,7 +65,7 @@
+         else break;  // Don't retry unless CPG tells us to.
+     }
+ 
+-    if ( result != CPG_OK )
++    if ( result != CS_OK )
+         CPG_CHECK(result, c.msg(group));
+ }
+ 
+@@ -127,9 +127,9 @@
+     callbacks.cpg_confchg_fn = &globalConfigChange;
+ 
+     QPID_LOG(notice, "Initializing CPG");
+-    cpg_error_t err = cpg_initialize(&handle, &callbacks);
++    cs_error_t err = cpg_initialize(&handle, &callbacks);
+     int retries = 6; // FIXME aconway 2009-08-06: make this configurable.
+-    while (err == CPG_ERR_TRY_AGAIN && --retries) {
++    while (err == CS_ERR_TRY_AGAIN && --retries) {
+         QPID_LOG(notice, "Re-trying CPG initialization.");
+         sys::sleep(5);
+         err = cpg_initialize(&handle, &callbacks);
+@@ -169,11 +169,11 @@
+     if (flowState == CPG_FLOW_CONTROL_ENABLED)
+         return false;
+ 
+-    cpg_error_t result;
++    cs_error_t result;
+     do {
+         result = cpg_mcast_joined(handle, CPG_TYPE_AGREED, const_cast<iovec*>(iov), iovLen);
+-        if (result != CPG_ERR_TRY_AGAIN) CPG_CHECK(result, cantMcastMsg(group));
+-    } while(result == CPG_ERR_TRY_AGAIN);
++        if (result != CS_ERR_TRY_AGAIN) CPG_CHECK(result, cantMcastMsg(group));
++    } while(result == CS_ERR_TRY_AGAIN);
+     return true;
+ }
+ 
+@@ -187,34 +187,34 @@
+ }
+ 
+ void Cpg::dispatchOne() {
+-    CPG_CHECK(cpg_dispatch(handle,CPG_DISPATCH_ONE), "Error in CPG dispatch");
++    CPG_CHECK(cpg_dispatch(handle,CS_DISPATCH_ONE), "Error in CPG dispatch");
+ }
+ 
+ void Cpg::dispatchAll() {
+-    CPG_CHECK(cpg_dispatch(handle,CPG_DISPATCH_ALL), "Error in CPG dispatch");
++    CPG_CHECK(cpg_dispatch(handle,CS_DISPATCH_ALL), "Error in CPG dispatch");
+ }
+ 
+ void Cpg::dispatchBlocking() {
+-    CPG_CHECK(cpg_dispatch(handle,CPG_DISPATCH_BLOCKING), "Error in CPG dispatch");
++    CPG_CHECK(cpg_dispatch(handle,CS_DISPATCH_BLOCKING), "Error in CPG dispatch");
+ }
+ 
+-string Cpg::errorStr(cpg_error_t err, const std::string& msg) {
++string Cpg::errorStr(cs_error_t err, const std::string& msg) {
+     std::ostringstream  os;
+     os << msg << ": ";
+     switch (err) {
+-      case CPG_OK: os << "ok"; break;
+-      case CPG_ERR_LIBRARY: os << "library"; break;
+-      case CPG_ERR_TIMEOUT: os << "timeout"; break;
+-      case CPG_ERR_TRY_AGAIN: os << "try again"; break;
+-      case CPG_ERR_INVALID_PARAM: os << "invalid param"; break;
+-      case CPG_ERR_NO_MEMORY: os << "no memory"; break;
+-      case CPG_ERR_BAD_HANDLE: os << "bad handle"; break;
+-      case CPG_ERR_ACCESS: os << "access denied. You may need to set your group ID to 'ais'"; break;
+-      case CPG_ERR_NOT_EXIST: os << "not exist"; break;
+-      case CPG_ERR_EXIST: os << "exist"; break;
+-      case CPG_ERR_NOT_SUPPORTED: os << "not supported"; break;
+-      case CPG_ERR_SECURITY: os << "security"; break;
+-      case CPG_ERR_TOO_MANY_GROUPS: os << "too many groups"; break;
++      case CS_OK: os << "ok"; break;
++      case CS_ERR_LIBRARY: os << "library"; break;
++      case CS_ERR_TIMEOUT: os << "timeout"; break;
++      case CS_ERR_TRY_AGAIN: os << "try again"; break;
++      case CS_ERR_INVALID_PARAM: os << "invalid param"; break;
++      case CS_ERR_NO_MEMORY: os << "no memory"; break;
++      case CS_ERR_BAD_HANDLE: os << "bad handle"; break;
++      case CS_ERR_ACCESS: os << "access denied. You may need to set your group ID to 'ais'"; break;
++      case CS_ERR_NOT_EXIST: os << "not exist"; break;
++      case CS_ERR_EXIST: os << "exist"; break;
++      case CS_ERR_NOT_SUPPORTED: os << "not supported"; break;
++      case CS_ERR_SECURITY: os << "security"; break;
++      case CS_ERR_TOO_MANY_GROUPS: os << "too many groups"; break;
+       default: os << ": unknown cpg error " << err;
+     };
+     os << " (" << err << ")";
+--- qpidc-0.16/src/qpid/cluster/Cpg.h.orig	2009-12-11 16:29:00.000000000 +0100
++++ qpidc-0.16/src/qpid/cluster/Cpg.h	2020-12-13 06:57:45.132602462 +0100
+@@ -131,7 +131,7 @@
+         CpgOp ( std::string opName ) 
+           : opName(opName) { }
+ 
+-        virtual cpg_error_t op ( cpg_handle_t handle, struct cpg_name * ) = 0; 
++        virtual cs_error_t op ( cpg_handle_t handle, struct cpg_name * ) = 0; 
+         virtual std::string msg(const Name&) = 0;
+         virtual ~CpgOp ( ) { }
+     };
+@@ -141,7 +141,7 @@
+         CpgJoinOp ( )
+           : CpgOp ( std::string("cpg_join") ) { }
+ 
+-        cpg_error_t op(cpg_handle_t handle, struct cpg_name * group) { 
++        cs_error_t op(cpg_handle_t handle, struct cpg_name * group) { 
+             return cpg_join ( handle, group ); 
+         }
+ 
+@@ -152,7 +152,7 @@
+         CpgLeaveOp ( )
+           : CpgOp ( std::string("cpg_leave") ) { }
+ 
+-        cpg_error_t op(cpg_handle_t handle, struct cpg_name * group) { 
++        cs_error_t op(cpg_handle_t handle, struct cpg_name * group) { 
+             return cpg_leave ( handle, group ); 
+         }
+ 
+@@ -163,7 +163,7 @@
+         CpgFinalizeOp ( )
+           : CpgOp ( std::string("cpg_finalize") ) { }
+ 
+-        cpg_error_t op(cpg_handle_t handle, struct cpg_name *) { 
++        cs_error_t op(cpg_handle_t handle, struct cpg_name *) { 
+             return cpg_finalize ( handle ); 
+         }
+ 
+@@ -177,7 +177,7 @@
+     CpgLeaveOp    cpgLeaveOp;
+     CpgFinalizeOp cpgFinalizeOp;
+ 
+-    static std::string errorStr(cpg_error_t err, const std::string& msg);
++    static std::string errorStr(cs_error_t err, const std::string& msg);
+     static std::string cantJoinMsg(const Name&);
+     static std::string cantLeaveMsg(const Name&);
+     static std::string cantMcastMsg(const Name&);

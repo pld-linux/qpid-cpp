@@ -1,0 +1,33 @@
+--- qpidc-0.16/src/tests/qpid-receive.cpp.orig	2012-02-17 15:54:46.000000000 +0100
++++ qpidc-0.16/src/tests/qpid-receive.cpp	2020-12-13 12:00:09.267640585 +0100
+@@ -131,8 +131,7 @@
+             if (address.empty()) throw qpid::Exception("Address must be specified!");
+             qpid::log::Logger::instance().configure(log);
+             if (help) {
+-                std::ostringstream msg;
+-                std::cout << msg << *this << std::endl << std::endl
++                std::cout << *this << std::endl << std::endl
+                           << "Drains messages from the specified address" << std::endl;
+                 return false;
+             } else {
+--- qpidc-0.16/src/tests/qpid-send.cpp.orig	2011-10-07 16:21:48.000000000 +0200
++++ qpidc-0.16/src/tests/qpid-send.cpp	2020-12-13 12:22:48.683609330 +0100
+@@ -157,8 +157,7 @@
+             if (address.empty()) throw qpid::Exception("Address must be specified!");
+             qpid::log::Logger::instance().configure(log);
+             if (help) {
+-                std::ostringstream msg;
+-                std::cout << msg << *this << std::endl << std::endl
++                std::cout << *this << std::endl << std::endl
+                           << "Drains messages from the specified address" << std::endl;
+                 return false;
+             } else {
+@@ -237,7 +236,7 @@
+   public:
+     virtual bool setContent(Message& msg) {
+         string content;
+-        bool got = getline(std::cin, content);
++        bool got = !!getline(std::cin, content);
+         if (got) msg.setContent(content);
+         return got;
+     }
