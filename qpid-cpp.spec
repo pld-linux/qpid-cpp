@@ -185,13 +185,13 @@ Wiązania języka Ruby do bibliotek Qpid/C++.
 
 %prep
 %setup -q -n qpidc-%{version}
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p2
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
+%patch -P0 -p1
+%patch -P1 -p1
+%patch -P2 -p1
+%patch -P3 -p2
+%patch -P4 -p1
+%patch -P5 -p1
+%patch -P6 -p1
 
 # deprecated std::auto_ptr
 # "invalid use of incomplete type qpid::framing::Handler<T>"
